@@ -111,8 +111,8 @@ class TensorFlowArchitecture(Architecture):
             for idx, var in enumerate(self.weights):
                 placeholder = tf.placeholder(tf.float32, shape=var.get_shape(), name=str(idx) + '_holder')
                 self.weights_placeholders.append(placeholder)
-                if self.ap.visualization.tensorboard:
-                    variable_summaries(var)
+                # if self.ap.visualization.tensorboard:
+                #     variable_summaries(var)
 
             # create op for assigning a list of weights to the network weights
             self.update_weights_from_list = [weights.assign(holder) for holder, weights in
@@ -139,7 +139,7 @@ class TensorFlowArchitecture(Architecture):
             if self.ap.visualization.tensorboard:
                 current_scope_summaries = tf.get_collection(tf.GraphKeys.SUMMARIES,
                                                             scope=tf.contrib.framework.get_name_scope())
-                self.merged = tf.summary.merge(current_scope_summaries)
+                self.merged = tf.summary.merge_all(name="all_summaries")
 
             # initialize or restore model
             self.init_op = tf.group(

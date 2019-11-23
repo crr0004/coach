@@ -97,6 +97,10 @@ class PPOHead(Head):
                 tf.add_to_collection(tf.GraphKeys.REGULARIZATION_LOSSES, self.regularizations)
 
         self.loss = self.surrogate_loss
+
+        #tf.summary.scalar("ppo_head_target_sum", tf.reduce_sum(self.target))
+        tf.summary.scalar("ppo_head_loss", self.loss)
+        tf.summary.scalar("ppo_head_entropy", self.entropy)
         tf.losses.add_loss(self.loss)
 
     def _build_discrete_net(self, input_layer, action_space):

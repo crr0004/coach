@@ -47,6 +47,8 @@ class PPOVHead(Head):
                                                   self.clip_likelihood_ratio_using_epsilon) - self.target)
         self.vf_loss = tf.reduce_mean(tf.maximum(value_loss_1, value_loss_2))
         self.loss = self.vf_loss
+
+        tf.summary.scalar("ppo_v_head_loss", self.loss)
         tf.losses.add_loss(self.loss)
 
     def __str__(self):
