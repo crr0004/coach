@@ -7,6 +7,9 @@
 
 <p align="center"><img src="img/coach_logo.png" alt="Coach Logo" width="200"/></p>
 
+# CRR Deepracer
+This branch is based off v0.11.1 with some modifications to aid deepracer
+
 Coach is a python reinforcement learning framework containing implementation of many state-of-the-art algorithms.
 
 It exposes a set of easy-to-use APIs for experimenting with new RL algorithms, and allows simple integration of new environments to solve. 
