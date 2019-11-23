@@ -150,6 +150,7 @@ class ClippedPPOAgent(ActorCriticAgent):
     def fill_advantages(self, batch):
         network_keys = self.ap.network_wrappers['main'].input_embedders_parameters.keys()
 
+        # See tensorflow_components/architecture.py for implementation of network methods
         current_state_values = self.networks['main'].online_network.predict(batch.states(network_keys))[0]
         current_state_values = current_state_values.squeeze()
         self.state_values.add_sample(current_state_values)
