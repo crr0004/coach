@@ -18,6 +18,7 @@ import copy
 from collections import OrderedDict
 from random import shuffle
 from typing import Union
+import tensorflow as tf
 
 import numpy as np
 
@@ -141,6 +142,8 @@ class ClippedPPOAgent(ActorCriticAgent):
         self.kl_divergence = self.register_signal('KL Divergence')
         self.likelihood_ratio = self.register_signal('Likelihood Ratio')
         self.clipped_likelihood_ratio = self.register_signal('Clipped Likelihood Ratio')
+        self.tf_reward = tf.placeholder(tf.float32, [None], name="raw_reward")
+        tf.summary.scalar("ppo_agent_reward_mean", tf.reduce_sum(self.tf_reward))
 
     def set_session(self, sess):
         super().set_session(sess)
@@ -207,6 +210,7 @@ class ClippedPPOAgent(ActorCriticAgent):
                        self.networks['main'].online_network.output_heads[1].entropy,
                        self.networks['main'].online_network.output_heads[1].likelihood_ratio,
                        self.networks['main'].online_network.output_heads[1].clipped_likelihood_ratio]
+            self.networks['main'].online_network.inputs['raw_reward'] = self.tf_reward
 
             for i in range(int(batch.size / self.ap.network_wrappers['main'].batch_size)):
                 start = i * self.ap.network_wrappers['main'].batch_size
@@ -224,6 +228,7 @@ class ClippedPPOAgent(ActorCriticAgent):
                 # the shuffling being done, should only be performed on the indices.
                 result = self.networks['main'].target_network.predict({k: v[start:end] for k, v in batch.states(network_keys).items()})
                 old_policy_distribution = result[1:]
+                self.tf_reward
 
                 total_returns = batch.n_step_discounted_rewards(expand_dims=True)
 
@@ -235,6 +240,7 @@ class ClippedPPOAgent(ActorCriticAgent):
 
                 inputs = copy.copy({k: v[start:end] for k, v in batch.states(network_keys).items()})
                 inputs['output_1_0'] = actions
+                
 
                 # The old_policy_distribution needs to be represented as a list, because in the event of
                 # discrete controls, it has just a mean. otherwise, it has both a mean and standard deviation
@@ -244,6 +250,8 @@ class ClippedPPOAgent(ActorCriticAgent):
                 # update the clipping decay schedule value
                 inputs['output_1_{}'.format(len(old_policy_distribution)+1)] = \
                     self.ap.algorithm.clipping_decay_schedule.current_value
+
+                inputs['raw_reward'] = batch.rewards()
 
                 total_loss, losses, unclipped_grads, fetch_result = \
                     self.networks['main'].train_and_sync_networks(

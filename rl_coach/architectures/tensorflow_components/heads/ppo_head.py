@@ -98,7 +98,7 @@ class PPOHead(Head):
 
         self.loss = self.surrogate_loss
 
-        #tf.summary.scalar("ppo_head_target_sum", tf.reduce_sum(self.target))
+        #tf.summary.scalar("ppo_head_target_sum", tf.reduce_mean(self.target))
         tf.summary.scalar("ppo_head_loss", self.loss)
         tf.summary.scalar("ppo_head_entropy", self.entropy)
         tf.losses.add_loss(self.loss)
